@@ -1,26 +1,33 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+namespace Game
 {
-    [SerializeField] private float speed = 10;
-
-    private Rigidbody2D rb;
-
-    private void Awake() => 
-        rb = GetComponent<Rigidbody2D>();
-
-    void Update()
+    [RequireComponent(typeof(Rigidbody2D))]
+    public class PlayerController : MonoBehaviour
     {
-        if (Input.GetKey(KeyCode.W))
-            rb.velocity = Vector2.up * speed * Time.deltaTime;
-        else if (Input.GetKey(KeyCode.S))
-            rb.velocity = Vector2.down * speed * Time.deltaTime;
-        else if (Input.GetKey(KeyCode.A))
-            rb.velocity = Vector2.left * speed * Time.deltaTime;
-        else if (Input.GetKey(KeyCode.D))
-            rb.velocity = Vector2.right * speed * Time.deltaTime;
-        else
-            rb.velocity = Vector2.zero;
+        [SerializeField] private float speed = 10;
+
+        private Rigidbody2D rb;
+        private PlayerInputActions inputActions;
+
+        private void Awake()
+        {
+            rb = GetComponent<Rigidbody2D>();
+
+            inputActions = new PlayerInputActions();
+            inputActions.PlayerControls.Enable();
+
+            inputActions.PlayerControls.Attack.performed += OnAttackInput;
+        }
+
+        private void OnAttackInput(InputAction.CallbackContext obj) => 
+            Debug.Log("Attack pressed!");
+
+        void Update()
+        {
+            var moveInput = inputActions.PlayerControls.Movement.ReadValue<Vector2>();
+            rb.velocity = moveInput * speed * Time.deltaTime;
+        }
     }
 }
